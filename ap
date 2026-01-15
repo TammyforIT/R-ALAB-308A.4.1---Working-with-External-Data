@@ -1,0 +1,64 @@
+const API_KEY = "ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ㅤ ";
+const BASE_URL = "https://api.thecatapi.com/v1";
+
+const breedSelect = document.getElementById("breedSelect");
+const carousel = document.getElementById("carousel");
+const infoDump = document.getElementById("infoDump");
+
+async function initialLoad() {
+  const res = await fetch(`${BASE_URL}/breeds`, {
+    headers: { "x-api-key": API_KEY }
+  });
+
+  const breeds = await res.json();
+
+  breeds.forEach(breed => {
+    const option = document.createElement("option");
+    option.value = breed.id;
+    option.textContent = breed.name;
+    breedSelect.appendChild(option);
+  });
+
+
+  loadBreed(breeds[0].id);
+}
+
+
+// ------------------------------
+async function loadBreed(breedId) {
+  carousel.innerHTML = "";
+  infoDump.innerHTML = "";
+
+  const res = await fetch(
+    `${BASE_URL}/images/search?breed_ids=${breedId}&limit=5`,
+    { headers: { "x-api-key": API_KEY } }
+  );
+
+  const data = await res.json();
+
+  // Build carousel
+  data.forEach(item => {
+    const img = document.createElement("img");
+    img.src = item.url;
+    img.className = "carousel-img";
+    carousel.appendChild(img);
+  });
+
+  // Build info section
+  if (data[0]?.breeds?.length) {
+    const b = data[0].breeds[0];
+
+    infoDump.innerHTML = `
+      <h2>${b.name}</h2>
+      <p><strong>Origin:</strong> ${b.origin}</p>
+      <p><strong>Temperament:</strong> ${b.temperament}</p>
+      <p>${b.description}</p>
+    `;
+  }
+}
+
+
+breedSelect.addEventListener("change", e => loadBreed(e.target.value));
+
+
+initialLoad();
